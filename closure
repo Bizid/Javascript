@@ -1,0 +1,26 @@
+var hidden = mystery(3);
+var jumble = mystery3(hidden);
+var result = jumble(2);
+
+function mystery ( input ){
+  var secret = 4;
+  input+=2;
+console.log("input "+ input);
+  function mystery2 ( multiplier ) { 
+    multiplier *= input;
+console.log("multiplier "+ multiplier);
+console.log("secret "+ secret);
+    return secret * multiplier;
+  }
+  return mystery2;
+}
+function mystery3 ( param ){
+  function mystery4 ( bonus ){
+console.log("param "+ param(6));
+console.log("bonus "+ bonus);
+    return param(6) + bonus;
+
+  }
+  return mystery4;
+}
+console.log(result);  //122
