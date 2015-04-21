@@ -1,472 +1,449 @@
-<script language="javascript" type="text/javascript">
-    var FriphonePriceFull;
-    var FriphoneRebate;
-    var FriphonePrice;
-    var FriphonePaymentUpfront;
-    var FrismartPrice;
-    var mobilAbonementPeriodFinal;      
-    var phoneRebateLilinor;
-    var phoneRebateBasis;
-    var phoneRebateFriOne;
-    var phoneRebateFriFive;
-    var phoneRebateFriTwenty;
-    var phoneRebateFriEight;
-    var phoneRebateTelenorMinut;
-    var iphoneChecked;
-    var iphone;
-    var phonePriceLilinor;
-    var phonePriceBasis;
-    var phonePriceFriOne;
-    var phonePriceFriFive;
-    var phonePriceFriTwenty;
-    var phonePriceFriEight;
-    var phonePriceTelenorMinut;    
-    var defaultSubscription;
-	var wimpCheckedFinal = false;	
-	var mobilAbonementPeriodF;
-	var purchaseIpadData = {};
-	var tmpData = {};
-	var broadbandApp = [];
-	var urlProductId;
-	var urlVariantId;
 
-	function appendIpadData(productId) {
-	    purchaseIpadData = {};
-	    $.ajax({
-	        url: "/webservices/ProductPresentationJSON.asmx/GetSimplePhoneSubscriptionView",
-	        type: "POST",
-	        data: "{'phoneId':'" + productId + "', 'subscriptionId':'', 'useOverruleSubscription':'false', 'isPrivate':'false'}",
-	        contentType: "application/json; charset=utf-8",
-	        dataType: "json",
-	        async: false,
-			beforeSend: function() { showFormBusy(); },			
-	        complete:
-         function(data) {
-             jData = jQuery.parseJSON(jQuery.parseJSON(data.responseText).d);
-             purchaseIpadData.ipadId = productId;
-             purchaseIpadData.ipadName = jData.Name;
-             purchaseIpadData.ipadImage = jData.ImageUrl;
-             purchaseIpadData.minimumBindingPeriod = 6;
-             purchaseIpadData.selectedPaymentMonths = 24;
-             purchaseIpadData.minimumPaymentMonthly = 25;
-             purchaseIpadData.defaultSubscription = "302250(AllProducts)";
-             purchaseIpadData.defaultPaymentPlan = 'pris24'; 
-             purchaseIpadData.cachePayment = true; 
-             purchaseIpadData.subscriptions = [];
-             for (var i in jData.Prices) {
-                 var pr = jData.Prices[i];
-                 if (pr.SubscriptionProductId == purchaseIpadData.defaultSubscription) {
-                     purchaseIpadData.PhonePriceNoSubscription = pr.PhonePriceNoSubscription;									 
-                     purchaseIpadData.paynow = pr.UpFrontPayment;
-                     purchaseIpadData.additionalMonthlyPayment = pr.CheapestPaymentFeeTotal;
-				}
-                var sub = {};				
-				sub.PhonePriceNoSubscription = pr.PhonePriceNoSubscription;				
-				sub.PhonePriceAfterRabat = pr.TotalSubscriptionPriceBindingPeriod;
-				sub.PhonePriceNoSubscriptionSplit = pr.PhonePriceNoSubscription.replace(/[.]+/g, "").split(",")[0];
-				sub.PhonePriceSplit =	pr.PhonePrice.replace(/[.]+/g, "").split(",")[0];
-				sub.PhoneRabat = sub.PhonePriceSplit - sub.PhonePriceNoSubscriptionSplit; 				
-				sub.subscriptionId = pr.SubscriptionProductId;
-                sub.subscriptionName = pr.SubscriptionDisplayName;
-                sub.nyKundePris = pr.PhoneAndSubscriptionRecurring;				
-                sub.nyKundeMindsPris = pr.TotalPriceBindingPeriod;
-                sub.alleredePris = pr.PhoneAndSubscriptionRecurring; 
-                sub.alleredeKundeMindsPris = pr.TotalPriceBindingPeriod; 				
-                sub.prisCachePayment = pr.PhonePrice; 
-				purchaseIpadData.InstallmentTotal  = pr.InstallmentTotal.replace(/[.]+/g, "");
-				var newprice = pr.PhonePrice.replace(/[.]+/g, "");				
-				var PhonePrice24 = parseInt(newprice) / 24;   
-				PhonePrice24 = parseFloat(PhonePrice24).toFixed(2).toString().replace(".", ",");
-				sub.pris24 = PhonePrice24;                
-				var PhonePrice12 = parseInt(newprice) / 12;   
-				PhonePrice12 = parseFloat(PhonePrice12).toFixed(2).toString().replace(".", ",");
-				sub.pris12 = PhonePrice12;                
-				var PhonePrice6 = parseInt(newprice) / 6;   
-				PhonePrice6 = parseFloat(PhonePrice6).toFixed(2).toString().replace(".", ",");
-				sub.pris6 = PhonePrice6;				
-				var PhonePriceIncludeTax = parseInt( newprice) * 1.25;   
-				var PhoneTax = PhonePriceIncludeTax - parseInt( newprice) ;
-				PhonePriceIncludeTax = parseFloat(PhonePriceIncludeTax).toFixed(2).toString().replace(".", ",");
-				sub.phonePriceIncludeTax = PhonePriceIncludeTax;				
-				PhoneTax = parseFloat(PhoneTax).toFixed(2).toString().replace(".", ",");
-				sub.phoneTax = PhoneTax;
-				sub.udbetaling = pr.UpFrontPayment;
-                 purchaseIpadData.subscriptions.push(sub);
+var defaultSubscription;
+var mobilAbonementPeriodF;
+var purchaseIpadData = {};
+var urlProductId;
+var urlVariantId;
+
+function appendIpadData(productId) {
+    purchaseIpadData = {};
+    $.ajax({
+        url: "/webservices/ProductPresentationJSON.asmx/GetSimplePhoneSubscriptionView",
+        type: "POST",
+        data: "{'phoneId':'" + productId + "', 'subscriptionId':'', 'useOverruleSubscription':'false', 'isPrivate':'false'}",
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        async: false,
+		beforeSend: function() { showFormBusy(); },			
+        complete:
+     function(data) {
+         jData = jQuery.parseJSON(jQuery.parseJSON(data.responseText).d);
+         purchaseIpadData.ipadId = productId;
+         purchaseIpadData.ipadName = jData.Name;
+         purchaseIpadData.ipadImage = jData.ImageUrl;
+         purchaseIpadData.minimumBindingPeriod = 6;
+         purchaseIpadData.selectedPaymentMonths = 24;
+         purchaseIpadData.minimumPaymentMonthly = 25;
+         purchaseIpadData.defaultSubscription = "302250(AllProducts)";
+         purchaseIpadData.defaultPaymentPlan = 'pris24'; 
+         purchaseIpadData.cachePayment = true; 
+         purchaseIpadData.subscriptions = [];
+         for (var i in jData.Prices) {
+             var pr = jData.Prices[i];
+             if (pr.SubscriptionProductId == purchaseIpadData.defaultSubscription) {
+                 purchaseIpadData.PhonePriceNoSubscription = pr.PhonePriceNoSubscription;									 
+                 purchaseIpadData.paynow = pr.UpFrontPayment;
+                 purchaseIpadData.additionalMonthlyPayment = pr.CheapestPaymentFeeTotal;
+			}
+            var sub = {};				
+			sub.PhonePriceNoSubscription = pr.PhonePriceNoSubscription;				
+			sub.PhonePriceAfterRabat = pr.TotalSubscriptionPriceBindingPeriod;
+			sub.PhonePriceNoSubscriptionSplit = pr.PhonePriceNoSubscription.replace(/[.]+/g, "").split(",")[0];
+			sub.PhonePriceSplit =	pr.PhonePrice.replace(/[.]+/g, "").split(",")[0];
+			sub.PhoneRabat = sub.PhonePriceSplit - sub.PhonePriceNoSubscriptionSplit; 				
+			sub.subscriptionId = pr.SubscriptionProductId;
+            sub.subscriptionName = pr.SubscriptionDisplayName;
+            sub.nyKundePris = pr.PhoneAndSubscriptionRecurring;				
+            sub.nyKundeMindsPris = pr.TotalPriceBindingPeriod;
+            sub.alleredePris = pr.PhoneAndSubscriptionRecurring; 
+            sub.alleredeKundeMindsPris = pr.TotalPriceBindingPeriod; 				
+            sub.prisCachePayment = pr.PhonePrice; 
+			purchaseIpadData.InstallmentTotal  = pr.InstallmentTotal.replace(/[.]+/g, "");
+			var newprice = pr.PhonePrice.replace(/[.]+/g, "");				
+			var PhonePrice24 = parseInt(newprice) / 24;   
+			PhonePrice24 = parseFloat(PhonePrice24).toFixed(2).toString().replace(".", ",");
+			sub.pris24 = PhonePrice24;                
+			var PhonePrice12 = parseInt(newprice) / 12;   
+			PhonePrice12 = parseFloat(PhonePrice12).toFixed(2).toString().replace(".", ",");
+			sub.pris12 = PhonePrice12;                
+			var PhonePrice6 = parseInt(newprice) / 6;   
+			PhonePrice6 = parseFloat(PhonePrice6).toFixed(2).toString().replace(".", ",");
+			sub.pris6 = PhonePrice6;				
+			var PhonePriceIncludeTax = parseInt( newprice) * 1.25;   
+			var PhoneTax = PhonePriceIncludeTax - parseInt( newprice) ;
+			PhonePriceIncludeTax = parseFloat(PhonePriceIncludeTax).toFixed(2).toString().replace(".", ",");
+			sub.phonePriceIncludeTax = PhonePriceIncludeTax;				
+			PhoneTax = parseFloat(PhoneTax).toFixed(2).toString().replace(".", ",");
+			sub.phoneTax = PhoneTax;
+			sub.udbetaling = pr.UpFrontPayment;
+             purchaseIpadData.subscriptions.push(sub);
+         }
+     }
+    });
+    $.ajax({
+        url: "/webservices/ProductPresentationJSON.asmx/GetMobilePhoneProductView",
+        type: "POST",
+        data: "{'phoneId':'" + productId + "', 'isPrivate':'false'}",
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        async: false,
+        complete:
+     function(data) {
+         jData1 = jQuery.parseJSON(jQuery.parseJSON(data.responseText).d);
+         for (var p in jData1.ProductSpecifications) {
+             var ps = jData1.ProductSpecifications[p];
+             if (ps.Name == 'spec_InternalMemory') {
+                 purchaseIpadData.ipadCapacity = ps.Value;
+                 break;
              }
          }
-	    });
-	    $.ajax({
-	        url: "/webservices/ProductPresentationJSON.asmx/GetMobilePhoneProductView",
-	        type: "POST",
-	        data: "{'phoneId':'" + productId + "', 'isPrivate':'false'}",
-	        contentType: "application/json; charset=utf-8",
-	        dataType: "json",
-	        async: false,
-	        complete:
-         function(data) {
-             jData1 = jQuery.parseJSON(jQuery.parseJSON(data.responseText).d);
-             for (var p in jData1.ProductSpecifications) {
-                 var ps = jData1.ProductSpecifications[p];
-                 if (ps.Name == 'spec_InternalMemory') {
-                     purchaseIpadData.ipadCapacity = ps.Value;
-                     break;
-                 }
-             }
-             purchaseIpadData.ipadType = 'UnknownType';
-             purchaseIpadData.ipadColor = jData1.Variants[0].Color;
-			 purchaseIpadData.ipadInStock = jData1.Variants[0].InStock;			 
-			 setTimeout(function(){ busyStop(); }, 1000);
-         }
-	    });
-	}
-	$(document).ready(function() {
-		urlProductId = $.getUrlVar('ProductId');
-		urlVariantId = $.getUrlVar('VariantId');
-		appendIpadData(urlProductId);	
-		$("input[name='period']").click(function() {
-			var customerType = $('input:radio[name=period]:checked').closest("ul").attr("name");
-			if(customerType == "NewCustomer"){
-				$('.box-content').attr("class", "box-content blackbg");	
-				$(this).closest('.box-content').attr("class", "box-content purpolbg");			
-			}else{
-				$('.box-content').attr("class", "box-content blackbg");	
-			}	
-			var prisCachePayementTemp = $('input:radio[name=period]:checked').closest("ul").find('input[name="prisCachePayement"]').val();
-			var pris24Temp = $('input:radio[name=period]:checked').closest("ul").find('input[name="pris24"]').val();
-			var pris12Temp = $('input:radio[name=period]:checked').closest("ul").find('input[name="pris12"]').val();
-			var pris6Temp = $('input:radio[name=period]:checked').closest("ul").find('input[name="pris6"]').val();			
-			var PhonePriceNoSubscriptionTemp = $('input:radio[name=period]:checked').closest("ul").find('input[name="PhonePriceNoSubscription"]').val();
-			var PhonePriceAfterRabatTemp = $('input:radio[name=period]:checked').closest("ul").find('input[name="PhonePriceAfterRabat"]').val();
-			var PhoneRabatTemp = $('input:radio[name=period]:checked').closest("ul").find('input[name="PhoneRabat"]').val();
-			var subscriptionNameTemp = $('input:radio[name=period]:checked').closest(".box-content").find('[name="subscription-name"]').text();
-			var subscriptionCapacityTemp = $('input:radio[name=period]:checked').closest(".box-content").find('[name="num-subscription-months"]').text();			
-			var phonePriceIncludeTaxTemp = $('input:radio[name=period]:checked').closest("ul").find('input[name="phonePriceIncludeTax"]').val();
-			var phoneTaxTemp = $('input:radio[name=period]:checked').closest("ul").find('input[name="phoneTax"]').val();			
-			$('ul[name=CachePaymentMdr]').find('span[name="prisMdr"]').text(prisCachePayementTemp);
-			$('ul[name=TwentyFourMdr]').find('span[name="prisMdr"]').text(pris24Temp);		
-			$('ul[name=TwelveMdr]').find('span[name="prisMdr"]').text(pris12Temp);
-			$('ul[name=SixMdr]').find('span[name="prisMdr"]').text(pris6Temp);	
-			$('.PhonePriceNoSubscription').text(PhonePriceNoSubscriptionTemp);		
-			$('.PhoneRabat').text(PhoneRabatTemp);
-			$('.prisCachePayement').text(prisCachePayementTemp);
-			$('.TotalSubscriptionPriceBindingPeriod').text(PhonePriceAfterRabatTemp);
-			$('.subscription-name').text(subscriptionNameTemp);
-			$('.subscription-capacity').text(subscriptionCapacityTemp);		
-			$('.phonePriceIncludeTax').text(phonePriceIncludeTaxTemp);
-			$('.phoneTax').text(phoneTaxTemp);
-			var checkedPeriod = $('input:radio[name=periodMdr]:checked').closest("ul").attr("name");
-			if(checkedPeriod == "CachePaymentMdr"){
-				$('[name=instalment-plan-text]').hide();
-			}else{
-				$('[name=instalment-plan-text]').show();
-			}			
-        });
-		$('[name="chooseOtherIpad"]').click(function() {
-			$(".select_other_ipad").show();
-		}); 
-		$( ".select_other_ipad" ).mouseleave(function(){
-			$(".select_other_ipad").hide();
-		});	
-		$('input:radio[name="selectIpad"]').change(function() {
-			var oldPeriodMdr = $('input:radio[name=periodMdr]:checked').closest("ul").attr("name");
-			var choosedIpadToShow = $('[name="selectOtherIpad"]').find('input:radio[name="selectIpad"]:checked').val();
-			$(".select_other_ipad").hide();
-			appendIpadData(choosedIpadToShow);
-			updatePageAfterSelctIpad();
-			$('[name="'+ oldPeriodMdr +'"]').find('input:radio[name="periodMdr"]').click();		
-			$("input[id$='PhoneIdHiddenField']").val(choosedIpadToShow);
-			$("input[id$='PhoneVariantIdHiddenField']").val(choosedIpadToShow);
-		});       	
-        var phoneName = $('[name="phoneName"]').text(); 
-		$("li.radio-input").attr("class", "radio-input radio-input-unselected");
-        $(".price-and-radio-level li.radio-input").click(function () {		
-            $(".price-and-radio-level").attr("class", "price-and-radio-level");
-			$(".second-section").attr("class", "second-section");
-            $(".price-and-radio-level li.radio-input").attr("class", "radio-input radio-input-unselected");                        
-			var idParent = $(this).parent().parent().attr('id');			
-			if (idParent == "price-and-radio-telenor-minut"){
-				$(this).parent().parent().css( "border", "1px none" );
-				$(this).closest(".second-section").addClass("second-section-selected");					
-			}else{
-				$(this).parent().parent().attr("class", "price-and-radio-level price-and-radio-level-selected");
-			}			
-			$(this).attr("class", "radio-input radio-input-selected");
-            $(this).find("input").attr("checked","checked");            
-         });
-		$("#paymentModel li.radio-input").click(function () {
-            $("#paymentModel .payment-model-box-selected").attr("class", "payment-model-box");            
-            $("#paymentModel li.radio-input").attr("class", "radio-input radio-input-unselected");            
-            $(this).parent().attr("class", "payment-model-box payment-model-box-selected");
-            $(this).attr("class", "radio-input radio-input-selected");
-            $(this).find("input").attr("checked","checked");            
-         });		  
-		$("#chooseSub li.radio-input").click(function () {
-            $("#chooseSub .payment-model-box-selected").attr("class", "payment-model-box");            
-            $("#chooseSub li.radio-input").attr("class", "radio-input radio-input-unselected");            
-            $(this).parent().attr("class", "payment-model-box payment-model-box-selected");
-            $(this).attr("class", "radio-input radio-input-selected");
-            $(this).find("input").attr("checked","checked");            
-         });		 
-        $("input[name='periodMdr']").click(function() {
-            $('input:radio[name=period]:checked').click();
-			var nbrMonths = $('input:radio[name=periodMdr]:checked').val();
-			if(nbrMonths == "0"){
-				$("[name='hide-chache-payment']").hide();
-				$("[name='show-chache-payment']").show();				
-			}else{
-				$("[name='hide-chache-payment']").show();
-				$("[name='show-chache-payment']").hide();						
-        });            
-		$("#buy-button-FRI").click(function() {
-			var subscriptionSelected = $('input:radio[name=period]:checked').closest("ul").parent().attr("name");			
-			var checkedPeriod = $('input:radio[name=periodMdr]:checked').closest("ul").attr("name");			
-			if(checkedPeriod == "CachePaymentMdr"){
-				submitForm(subscriptionSelected, "", 0);
-			}
-			if(checkedPeriod == "TwentyFourMdr"){
-				submitForm(subscriptionSelected, "", 24);
-			}
-			if(checkedPeriod == "TwelveMdr"){
-				submitForm(subscriptionSelected, "", 12);
-			}
-			if(checkedPeriod == "SixMdr"){
-				submitForm(subscriptionSelected, "", 6);
-			}			
-		});
-        $(".readMore").live("click", function() { ShowReadMore($(this).attr('name')); });
+         purchaseIpadData.ipadType = 'UnknownType';
+         purchaseIpadData.ipadColor = jData1.Variants[0].Color;
+		 purchaseIpadData.ipadInStock = jData1.Variants[0].InStock;			 
+		 setTimeout(function(){ busyStop(); }, 1000);
+     }
+    });
+}
+
+
+$(document).ready(function() {
+	urlProductId = $.getUrlVar('ProductId');
+	urlVariantId = $.getUrlVar('VariantId');
+	appendIpadData(urlProductId);	
+	$("input[name='period']").click(function() {
+		var customerType = $('input:radio[name=period]:checked').closest("ul").attr("name");
+		if(customerType == "NewCustomer"){
+			$('.box-content').attr("class", "box-content blackbg");	
+			$(this).closest('.box-content').attr("class", "box-content purpolbg");			
+		}else{
+			$('.box-content').attr("class", "box-content blackbg");	
+		}	
+		var prisCachePayementTemp = $('input:radio[name=period]:checked').closest("ul").find('input[name="prisCachePayement"]').val();
+		var pris24Temp = $('input:radio[name=period]:checked').closest("ul").find('input[name="pris24"]').val();
+		var pris12Temp = $('input:radio[name=period]:checked').closest("ul").find('input[name="pris12"]').val();
+		var pris6Temp = $('input:radio[name=period]:checked').closest("ul").find('input[name="pris6"]').val();			
+		var PhonePriceNoSubscriptionTemp = $('input:radio[name=period]:checked').closest("ul").find('input[name="PhonePriceNoSubscription"]').val();
+		var PhonePriceAfterRabatTemp = $('input:radio[name=period]:checked').closest("ul").find('input[name="PhonePriceAfterRabat"]').val();
+		var PhoneRabatTemp = $('input:radio[name=period]:checked').closest("ul").find('input[name="PhoneRabat"]').val();
+		var subscriptionNameTemp = $('input:radio[name=period]:checked').closest(".box-content").find('[name="subscription-name"]').text();
+		var subscriptionCapacityTemp = $('input:radio[name=period]:checked').closest(".box-content").find('[name="num-subscription-months"]').text();			
+		var phonePriceIncludeTaxTemp = $('input:radio[name=period]:checked').closest("ul").find('input[name="phonePriceIncludeTax"]').val();
+		var phoneTaxTemp = $('input:radio[name=period]:checked').closest("ul").find('input[name="phoneTax"]').val();			
+		$('ul[name=CachePaymentMdr]').find('span[name="prisMdr"]').text(prisCachePayementTemp);
+		$('ul[name=TwentyFourMdr]').find('span[name="prisMdr"]').text(pris24Temp);		
+		$('ul[name=TwelveMdr]').find('span[name="prisMdr"]').text(pris12Temp);
+		$('ul[name=SixMdr]').find('span[name="prisMdr"]').text(pris6Temp);	
+		$('.PhonePriceNoSubscription').text(PhonePriceNoSubscriptionTemp);		
+		$('.PhoneRabat').text(PhoneRabatTemp);
+		$('.prisCachePayement').text(prisCachePayementTemp);
+		$('.TotalSubscriptionPriceBindingPeriod').text(PhonePriceAfterRabatTemp);
+		$('.subscription-name').text(subscriptionNameTemp);
+		$('.subscription-capacity').text(subscriptionCapacityTemp);		
+		$('.phonePriceIncludeTax').text(phonePriceIncludeTaxTemp);
+		$('.phoneTax').text(phoneTaxTemp);
+		var checkedPeriod = $('input:radio[name=periodMdr]:checked').closest("ul").attr("name");
+		if(checkedPeriod == "CachePaymentMdr"){
+			$('[name=instalment-plan-text]').hide();
+		}else{
+			$('[name=instalment-plan-text]').show();
+		}			
+    });
+	$('[name="chooseOtherIpad"]').click(function() {
+		$(".select_other_ipad").show();
+	}); 
+	$( ".select_other_ipad" ).mouseleave(function(){
 		$(".select_other_ipad").hide();
+	});	
+	$('input:radio[name="selectIpad"]').change(function() {
+		var oldPeriodMdr = $('input:radio[name=periodMdr]:checked').closest("ul").attr("name");
+		var choosedIpadToShow = $('[name="selectOtherIpad"]').find('input:radio[name="selectIpad"]:checked').val();
+		$(".select_other_ipad").hide();
+		appendIpadData(choosedIpadToShow);
 		updatePageAfterSelctIpad();
-		$('[name="302262(AllProducts)"]').find('input:radio[name="period"]').click(); // select the default MBB M as a new user
-		$('[name="CachePaymentMdr"]').find('input:radio[name="periodMdr"]').click(); // select the default 24 MDR  
-		updateIpadImage();	
-		$("[name='" + purchaseIpadData.defaultSubscription + "']").find('ul[name="NewCustomer"] input[name="period"]').click(); 	
-		updateSelectOtherIpad();
+		$('[name="'+ oldPeriodMdr +'"]').find('input:radio[name="periodMdr"]').click();		
+		$("input[id$='PhoneIdHiddenField']").val(choosedIpadToShow);
+		$("input[id$='PhoneVariantIdHiddenField']").val(choosedIpadToShow);
+	});       	
+    var phoneName = $('[name="phoneName"]').text(); 
+	$("li.radio-input").attr("class", "radio-input radio-input-unselected");
+    $(".price-and-radio-level li.radio-input").click(function () {		
+        $(".price-and-radio-level").attr("class", "price-and-radio-level");
+		$(".second-section").attr("class", "second-section");
+        $(".price-and-radio-level li.radio-input").attr("class", "radio-input radio-input-unselected");                        
+		var idParent = $(this).parent().parent().attr('id');			
+		if (idParent == "price-and-radio-telenor-minut"){
+			$(this).parent().parent().css( "border", "1px none" );
+			$(this).closest(".second-section").addClass("second-section-selected");					
+		}else{
+			$(this).parent().parent().attr("class", "price-and-radio-level price-and-radio-level-selected");
+		}			
+		$(this).attr("class", "radio-input radio-input-selected");
+        $(this).find("input").attr("checked","checked");            
+     });
+	$("#paymentModel li.radio-input").click(function () {
+        $("#paymentModel .payment-model-box-selected").attr("class", "payment-model-box");            
+        $("#paymentModel li.radio-input").attr("class", "radio-input radio-input-unselected");            
+        $(this).parent().attr("class", "payment-model-box payment-model-box-selected");
+        $(this).attr("class", "radio-input radio-input-selected");
+        $(this).find("input").attr("checked","checked");            
+     });		  
+	$("#chooseSub li.radio-input").click(function () {
+        $("#chooseSub .payment-model-box-selected").attr("class", "payment-model-box");            
+        $("#chooseSub li.radio-input").attr("class", "radio-input radio-input-unselected");            
+        $(this).parent().attr("class", "payment-model-box payment-model-box-selected");
+        $(this).attr("class", "radio-input radio-input-selected");
+        $(this).find("input").attr("checked","checked");            
+     });		 
+    $("input[name='periodMdr']").click(function() {
+        $('input:radio[name=period]:checked').click();
+		var nbrMonths = $('input:radio[name=periodMdr]:checked').val();
+		if(nbrMonths == "0"){
+			$("[name='hide-chache-payment']").hide();
+			$("[name='show-chache-payment']").show();				
+		}else{
+			$("[name='hide-chache-payment']").show();
+			$("[name='show-chache-payment']").hide();						
+    }));            
+	$("#buy-button-FRI").click(function() {
+		var subscriptionSelected = $('input:radio[name=period]:checked').closest("ul").parent().attr("name");			
+		var checkedPeriod = $('input:radio[name=periodMdr]:checked').closest("ul").attr("name");			
+		if(checkedPeriod == "CachePaymentMdr"){
+			submitForm(subscriptionSelected, "", 0);
+		}
+		if(checkedPeriod == "TwentyFourMdr"){
+			submitForm(subscriptionSelected, "", 24);
+		}
+		if(checkedPeriod == "TwelveMdr"){
+			submitForm(subscriptionSelected, "", 12);
+		}
+		if(checkedPeriod == "SixMdr"){
+			submitForm(subscriptionSelected, "", 6);
+		}			
+	});
+    $(".readMore").live("click", function() { ShowReadMore($(this).attr('name')); });
+	$(".select_other_ipad").hide();
+	updatePageAfterSelctIpad();
+	$('[name="302262(AllProducts)"]').find('input:radio[name="period"]').click(); // select the default MBB M as a new user
+	$('[name="CachePaymentMdr"]').find('input:radio[name="periodMdr"]').click(); // select the default 24 MDR  
+	updateIpadImage();	
+	$("[name='" + purchaseIpadData.defaultSubscription + "']").find('ul[name="NewCustomer"] input[name="period"]').click(); 	
+	updateSelectOtherIpad();
+	var checkedCustomerType = $('input:radio[name=period]:checked').closest('ul').attr('name');
+	if(checkedCustomerType =="AlreadyCustomer"){
+			checkedPricePerMonth = $('input:radio[name=period]:checked').closest('ul').find('span[name=pricePMAllrede]').text();
+		}else{
+			checkedPricePerMonth = $('input:radio[name=period]:checked').closest('ul').find('span[name=pricePMNy]').text();
+	}
+	var checkedSubPeriodPerMonth = $('input:radio[name=periodMdr]:checked').closest('ul').find('span[name=prisMdr]').text();
+	mobilAbonementPeriodF = parseFloat(checkedSubPeriodPerMonth) + parseFloat(checkedPricePerMonth);
+	mobilAbonementPeriodF = parseFloat(mobilAbonementPeriodF).toFixed(2).toString().replace(".", ",");
+	$('[name="mobilAbonement"]').text(mobilAbonementPeriodF);  
+	$("input[type=radio]").click(function() {
 		var checkedCustomerType = $('input:radio[name=period]:checked').closest('ul').attr('name');
 		if(checkedCustomerType =="AlreadyCustomer"){
-				checkedPricePerMonth = $('input:radio[name=period]:checked').closest('ul').find('span[name=pricePMAllrede]').text();
-			}else{
-				checkedPricePerMonth = $('input:radio[name=period]:checked').closest('ul').find('span[name=pricePMNy]').text();
-		}
-		var checkedSubPeriodPerMonth = $('input:radio[name=periodMdr]:checked').closest('ul').find('span[name=prisMdr]').text();
-		mobilAbonementPeriodF = parseFloat(checkedSubPeriodPerMonth) + parseFloat(checkedPricePerMonth);
-		mobilAbonementPeriodF = parseFloat(mobilAbonementPeriodF).toFixed(2).toString().replace(".", ",");
-		$('[name="mobilAbonement"]').text(mobilAbonementPeriodF);  
-		$("input[type=radio]").click(function() {
-			var checkedCustomerType = $('input:radio[name=period]:checked').closest('ul').attr('name');
-			if(checkedCustomerType =="AlreadyCustomer"){
-				var prMonthFinalCheck = $('input:radio[name=period]:checked').closest('ul').find('span[name=pricePMAllrede]').text();
-			}else{
-				var prMonthFinalCheck = $('input:radio[name=period]:checked').closest('ul').find('span[name=pricePMNy]').text();
-			}			
-			var minsprisSelected = $('input:radio[name=period]:checked').closest("ul").find(".mindstepris span").text();				
-			$("[name=mindsteprisSelectPeriod]").text(minsprisSelected);
-			$("[name='mobilCachepayment']").text(prMonthFinalCheck);
-			$('.subscriptionPriceSelected').text(prMonthFinalCheck);					
-			var periodMdrCheck = $('input:radio[name=periodMdr]:checked').closest('ul').find('span[name=prisMdr]').text();
-			mobilAbonementPeriodF = parseFloat(periodMdrCheck) + parseFloat(prMonthFinalCheck);				
-			mobilAbonementPeriodF = parseFloat(mobilAbonementPeriodF).toFixed(2).toString().replace(".", ",");
-			$('[name="mobilAbonement"]').text(mobilAbonementPeriodF);                
-			var nbrMonths = $('input:radio[name=periodMdr]:checked').val();
-			var selectedprisMdr = $('input:radio[name=periodMdr]:checked').closest('ul').find('[name=prisMdr]').text();
-			$('[name=betalingNbrOfMonths]').text(nbrMonths);
-			$('[name=betalingPricePeriodSelected]').text(selectedprisMdr);					
-		}); 	
-		firstStart();
-	});
-
-	function updatePageAfterSelctIpad() {
-		var getSubscription = purchaseIpadData.subscriptions;
-		var subscriptionArray = [];
-		for (var key in getSubscription) {
-			subscriptionArray.push(key);
-		}
-		for (var i = 0; i < subscriptionArray.length; i++) { 
-			var subId = subscriptionArray[i];
-			var inputData = getSubscription[subId];	
-			var subscriptionName = inputData.subscriptionName;	
-			var subscriptionId = inputData.subscriptionId;		
-			var nyKundePris = inputData.nyKundePris;
-			var nyKundeMindsPris = inputData.nyKundeMindsPris;	
-			var alleredePris = inputData.alleredePris;
-			var alleredeKundeMindsPris = inputData.alleredeKundeMindsPris;
-			var prisCachePayment = inputData.prisCachePayment;
-			var pris24 = inputData.pris24;
-			var pris12 = inputData.pris12;	
-			var pris6 = inputData.pris6;		
-			var PhonePriceNoSubscription = inputData.PhonePriceNoSubscription;
-			var PhonePriceAfterRabat = inputData.PhonePriceAfterRabat;
-			var PhoneRabat = inputData.PhoneRabat.toFixed(2);
-			PhoneRabat = addCommas(PhoneRabat);		
-			var phonePriceIncludeTax = inputData.phonePriceIncludeTax;
-			phonePriceIncludeTax = addCommas(phonePriceIncludeTax);		
-			var phoneTax = inputData.phoneTax;
-			phoneTax = addCommas(phoneTax);		
-			var udbetaling = inputData.udbetaling;			
-			$("[name='" + subscriptionId + "']").find('input[name="phonePriceIncludeTax"]').val(phonePriceIncludeTax);  
-			$("[name='" + subscriptionId + "']").find('input[name="phoneTax"]').val(phoneTax); 		
-			$("[name='" + subscriptionId + "']").find('span[name="pricePMNy"]').text(nyKundePris);  
-			$("[name='" + subscriptionId + "']").find('span[name="mindsteprisNy"]').text(nyKundeMindsPris); 		
-			$("[name='" + subscriptionId + "']").find('span[name="pricePMAllrede"]').text(alleredePris); 
-			$("[name='" + subscriptionId + "']").find('span[name="mindsteprisAllrede"]').text(alleredeKundeMindsPris);			
-			$("[name='" + subscriptionId + "']").find('input[name="prisCachePayement"]').val(prisCachePayment);
-			$("[name='" + subscriptionId + "']").find('input[name="pris24"]').val(pris24);		
-			$("[name='" + subscriptionId + "']").find('input[name="pris12"]').val(pris12);		
-			$("[name='" + subscriptionId + "']").find('input[name="pris6"]').val(pris6);		
-			$("[name='" + subscriptionId + "']").find('input[name="PhonePriceNoSubscription"]').val(PhonePriceNoSubscription);		
-			$("[name='" + subscriptionId + "']").find('input[name="PhonePriceAfterRabat"]').val(PhonePriceAfterRabat);		
-			$("[name='" + subscriptionId + "']").find('input[name="PhoneRabat"]').val(PhoneRabat);		
-		}
-		$("[name='phoneName']").text(purchaseIpadData.ipadName);
-	}
-
-	function updateIpadImage(){
-		var imagePath;
-		var iPadName = purchaseIpadData.ipadName;
-		var iPadColor = purchaseIpadData.ipadColor;	
-		if (iPadName.toLowerCase().indexOf("air") >= 0){
-			if ((iPadColor == "Grå") || (iPadColor == "Sort")){
-				imagePath ="/Images/ipadairblacksmall_tcm54-153463.png";			
-			}else{
-				imagePath ="/Images/ipadairwhitesmall_tcm54-153461.png";			
-			}		
+			var prMonthFinalCheck = $('input:radio[name=period]:checked').closest('ul').find('span[name=pricePMAllrede]').text();
 		}else{
-			if ((iPadColor == "Grå") || (iPadColor == "Sort")){
-				imagePath ="/Images/ipadblacksmall_tcm54-150812.png";			
-			}else{
-				imagePath ="/Images/ipadwhitesmall_tcm54-150815.png";			
-			}		
-		}	
-		$("[name='ImageSrc']").attr('src', imagePath);
-	}
-
-	function updateSelectOtherIpad(){
-		var IpadRetinaHvidProducts = ["105347(AllProducts)", "105349(AllProducts)",  "105351(AllProducts)"]; 
-		var IpadRetinaSortProducts = ["105346(AllProducts)",  "105348(AllProducts)", "105350(AllProducts)"]; 
-		var IpadMiniHvidProducts = [ "105345(AllProducts)"]; 
-		var IpadMiniSortProducts = ["105344(AllProducts)"]; 	
-		if(jQuery.inArray( urlProductId, IpadRetinaHvidProducts )  >= 0){
-			$('ul[name=selectOtherIpad]').find('[name=16] input').val("105347(AllProducts)");
-			if(!iPadInStock("105347(AllProducts)")){$('ul[name=selectOtherIpad]').find('[name=16]').addClass("prductSold")}
-			$('ul[name=selectOtherIpad]').find('[name=32] input').val("105349(AllProducts)");
-			if(!iPadInStock("105349(AllProducts)")){$('ul[name=selectOtherIpad]').find('[name=32]').addClass("prductSold")}
-			$('ul[name=selectOtherIpad]').find('[name=64] input').val("105351(AllProducts)");
-			if(!iPadInStock("105351(AllProducts)")){$('ul[name=selectOtherIpad]').find('[name=64]').addClass("prductSold")}		
-		}
-		if(jQuery.inArray( urlProductId, IpadRetinaSortProducts )  >= 0){
-			$('ul[name=selectOtherIpad]').find('[name=16] input').val("105346(AllProducts)");
-			if(!iPadInStock("105346(AllProducts)")){$('ul[name=selectOtherIpad]').find('[name=16]').addClass("prductSold")}
-			$('ul[name=selectOtherIpad]').find('[name=32] input').val("105348(AllProducts)");
-			if(!iPadInStock("105348(AllProducts)")){$('ul[name=selectOtherIpad]').find('[name=32]').addClass("prductSold")}
-			$('ul[name=selectOtherIpad]').find('[name=64] input').val("105350(AllProducts)");
-			if(!iPadInStock("105350(AllProducts)")){$('ul[name=selectOtherIpad]').find('[name=64]').addClass("prductSold")}
-		}	
-		if(jQuery.inArray( urlProductId, IpadMiniHvidProducts )  >= 0){
-			$('ul[name=selectOtherIpad]').find('[name=32] input').val("105345(AllProducts)");
-			if(!iPadInStock("105345(AllProducts)")){$('ul[name=selectOtherIpad]').find('[name=32]').addClass("prductSold")}
-			$('ul[name=selectOtherIpad]').find('[name=128]').addClass("hide");
-			$('.select_other_ipad').css("height","138px");		
-		}	
-		if(jQuery.inArray( urlProductId, IpadMiniSortProducts )  >= 0){
-			$('ul[name=selectOtherIpad]').find('[name=32] input').val("105344(AllProducts)");
-			if(!iPadInStock("105344(AllProducts)")){$('ul[name=selectOtherIpad]').find('[name=32]').addClass("prductSold")}
-			$('ul[name=selectOtherIpad]').find('[name=128]').addClass("hide");
-			$('.select_other_ipad').css("height","138px");
-		}
-		$('ul[name=selectOtherIpad]').find('input[value="'+ urlProductId +'"]').click();
-	}
-	
-	function firstStart(){
-		$("input[id$='PhoneIdHiddenField']").val(urlProductId);
-		$("input[id$='PhoneVariantIdHiddenField']").val(urlProductId);	
-		$('[name="302262(AllProducts)"]').find('input:radio[name="period"]').click();
-		$('[name="CachePaymentMdr"]').find('input:radio[name="periodMdr"]').click();
-	}
-
-	function iPadInStock(productId){
-		var iPadState;
-		$.ajax({
-			url: "/webservices/ProductPresentationJSON.asmx/GetMobilePhoneProductView",
-			type: "POST",
-			data: "{'phoneId':'" + productId + "', 'isPrivate':'true'}",
-			contentType: "application/json; charset=utf-8",
-			dataType: "json",
-			async: false,
-			complete:
-			function(data) {
-				jData2 = jQuery.parseJSON(jQuery.parseJSON(data.responseText).d);
-				iPadState = jData2.Variants[0].InStock;
-			}
-		});
-		return iPadState;
-	}
-
-	function ShowReadMore(SubscriptionName){
-		$('[name="'+SubscriptionName +'"]').closest("ul").find("input:radio").click();
-		$('[name="'+SubscriptionName +'"]').closest("ul").find("input:radio").click();
+			var prMonthFinalCheck = $('input:radio[name=period]:checked').closest('ul').find('span[name=pricePMNy]').text();
+		}			
+		var minsprisSelected = $('input:radio[name=period]:checked').closest("ul").find(".mindstepris span").text();				
+		$("[name=mindsteprisSelectPeriod]").text(minsprisSelected);
+		$("[name='mobilCachepayment']").text(prMonthFinalCheck);
+		$('.subscriptionPriceSelected').text(prMonthFinalCheck);					
+		var periodMdrCheck = $('input:radio[name=periodMdr]:checked').closest('ul').find('span[name=prisMdr]').text();
+		mobilAbonementPeriodF = parseFloat(periodMdrCheck) + parseFloat(prMonthFinalCheck);				
+		mobilAbonementPeriodF = parseFloat(mobilAbonementPeriodF).toFixed(2).toString().replace(".", ",");
+		$('[name="mobilAbonement"]').text(mobilAbonementPeriodF);                
 		var nbrMonths = $('input:radio[name=periodMdr]:checked').val();
 		var selectedprisMdr = $('input:radio[name=periodMdr]:checked').closest('ul').find('[name=prisMdr]').text();
-		if(nbrMonths == "0"){
-			$('.cachepayment-text').show();
-			$('.instalment-plan-block').hide();	
-		}else{
-			$('.cachepayment-text').hide();
-			$('.instalment-plan-block').show();
-			$('.nbr-of-months').text(nbrMonths);
-			$(".price24").text(selectedprisMdr);	
-		}
-		$('#tln-read-more-button').click();			
+		$('[name=betalingNbrOfMonths]').text(nbrMonths);
+		$('[name=betalingPricePeriodSelected]').text(selectedprisMdr);					
+	}); 	
+	firstStart();
+});
+
+function updatePageAfterSelctIpad() {
+	var getSubscription = purchaseIpadData.subscriptions;
+	var subscriptionArray = [];
+	for (var key in getSubscription) {
+		subscriptionArray.push(key);
 	}
+	for (var i = 0; i < subscriptionArray.length; i++) { 
+		var subId = subscriptionArray[i];
+		var inputData = getSubscription[subId];	
+		var subscriptionName = inputData.subscriptionName;	
+		var subscriptionId = inputData.subscriptionId;		
+		var nyKundePris = inputData.nyKundePris;
+		var nyKundeMindsPris = inputData.nyKundeMindsPris;	
+		var alleredePris = inputData.alleredePris;
+		var alleredeKundeMindsPris = inputData.alleredeKundeMindsPris;
+		var prisCachePayment = inputData.prisCachePayment;
+		var pris24 = inputData.pris24;
+		var pris12 = inputData.pris12;	
+		var pris6 = inputData.pris6;		
+		var PhonePriceNoSubscription = inputData.PhonePriceNoSubscription;
+		var PhonePriceAfterRabat = inputData.PhonePriceAfterRabat;
+		var PhoneRabat = inputData.PhoneRabat.toFixed(2);
+		PhoneRabat = addCommas(PhoneRabat);		
+		var phonePriceIncludeTax = inputData.phonePriceIncludeTax;
+		phonePriceIncludeTax = addCommas(phonePriceIncludeTax);		
+		var phoneTax = inputData.phoneTax;
+		phoneTax = addCommas(phoneTax);		
+		var udbetaling = inputData.udbetaling;			
+		$("[name='" + subscriptionId + "']").find('input[name="phonePriceIncludeTax"]').val(phonePriceIncludeTax);  
+		$("[name='" + subscriptionId + "']").find('input[name="phoneTax"]').val(phoneTax); 		
+		$("[name='" + subscriptionId + "']").find('span[name="pricePMNy"]').text(nyKundePris);  
+		$("[name='" + subscriptionId + "']").find('span[name="mindsteprisNy"]').text(nyKundeMindsPris); 		
+		$("[name='" + subscriptionId + "']").find('span[name="pricePMAllrede"]').text(alleredePris); 
+		$("[name='" + subscriptionId + "']").find('span[name="mindsteprisAllrede"]').text(alleredeKundeMindsPris);			
+		$("[name='" + subscriptionId + "']").find('input[name="prisCachePayement"]').val(prisCachePayment);
+		$("[name='" + subscriptionId + "']").find('input[name="pris24"]').val(pris24);		
+		$("[name='" + subscriptionId + "']").find('input[name="pris12"]').val(pris12);		
+		$("[name='" + subscriptionId + "']").find('input[name="pris6"]').val(pris6);		
+		$("[name='" + subscriptionId + "']").find('input[name="PhonePriceNoSubscription"]').val(PhonePriceNoSubscription);		
+		$("[name='" + subscriptionId + "']").find('input[name="PhonePriceAfterRabat"]').val(PhonePriceAfterRabat);		
+		$("[name='" + subscriptionId + "']").find('input[name="PhoneRabat"]').val(PhoneRabat);		
+	}
+	$("[name='phoneName']").text(purchaseIpadData.ipadName);
+}
+
+function updateIpadImage(){
+	var imagePath;
+	var iPadName = purchaseIpadData.ipadName;
+	var iPadColor = purchaseIpadData.ipadColor;	
+	if (iPadName.toLowerCase().indexOf("air") >= 0){
+		if ((iPadColor == "Grå") || (iPadColor == "Sort")){
+			imagePath ="/Images/ipadairblacksmall_tcm54-153463.png";			
+		}else{
+			imagePath ="/Images/ipadairwhitesmall_tcm54-153461.png";			
+		}		
+	}else{
+		if ((iPadColor == "Grå") || (iPadColor == "Sort")){
+			imagePath ="/Images/ipadblacksmall_tcm54-150812.png";			
+		}else{
+			imagePath ="/Images/ipadwhitesmall_tcm54-150815.png";			
+		}		
+	}	
+	$("[name='ImageSrc']").attr('src', imagePath);
+}
+
+function updateSelectOtherIpad(){
+	var IpadRetinaHvidProducts = ["105347(AllProducts)", "105349(AllProducts)",  "105351(AllProducts)"]; 
+	var IpadRetinaSortProducts = ["105346(AllProducts)",  "105348(AllProducts)", "105350(AllProducts)"]; 
+	var IpadMiniHvidProducts = [ "105345(AllProducts)"]; 
+	var IpadMiniSortProducts = ["105344(AllProducts)"]; 	
+	if(jQuery.inArray( urlProductId, IpadRetinaHvidProducts )  >= 0){
+		$('ul[name=selectOtherIpad]').find('[name=16] input').val("105347(AllProducts)");
+		if(!iPadInStock("105347(AllProducts)")){$('ul[name=selectOtherIpad]').find('[name=16]').addClass("prductSold")}
+		$('ul[name=selectOtherIpad]').find('[name=32] input').val("105349(AllProducts)");
+		if(!iPadInStock("105349(AllProducts)")){$('ul[name=selectOtherIpad]').find('[name=32]').addClass("prductSold")}
+		$('ul[name=selectOtherIpad]').find('[name=64] input').val("105351(AllProducts)");
+		if(!iPadInStock("105351(AllProducts)")){$('ul[name=selectOtherIpad]').find('[name=64]').addClass("prductSold")}		
+	}
+	if(jQuery.inArray( urlProductId, IpadRetinaSortProducts )  >= 0){
+		$('ul[name=selectOtherIpad]').find('[name=16] input').val("105346(AllProducts)");
+		if(!iPadInStock("105346(AllProducts)")){$('ul[name=selectOtherIpad]').find('[name=16]').addClass("prductSold")}
+		$('ul[name=selectOtherIpad]').find('[name=32] input').val("105348(AllProducts)");
+		if(!iPadInStock("105348(AllProducts)")){$('ul[name=selectOtherIpad]').find('[name=32]').addClass("prductSold")}
+		$('ul[name=selectOtherIpad]').find('[name=64] input').val("105350(AllProducts)");
+		if(!iPadInStock("105350(AllProducts)")){$('ul[name=selectOtherIpad]').find('[name=64]').addClass("prductSold")}
+	}	
+	if(jQuery.inArray( urlProductId, IpadMiniHvidProducts )  >= 0){
+		$('ul[name=selectOtherIpad]').find('[name=32] input').val("105345(AllProducts)");
+		if(!iPadInStock("105345(AllProducts)")){$('ul[name=selectOtherIpad]').find('[name=32]').addClass("prductSold")}
+		$('ul[name=selectOtherIpad]').find('[name=128]').addClass("hide");
+		$('.select_other_ipad').css("height","138px");		
+	}	
+	if(jQuery.inArray( urlProductId, IpadMiniSortProducts )  >= 0){
+		$('ul[name=selectOtherIpad]').find('[name=32] input').val("105344(AllProducts)");
+		if(!iPadInStock("105344(AllProducts)")){$('ul[name=selectOtherIpad]').find('[name=32]').addClass("prductSold")}
+		$('ul[name=selectOtherIpad]').find('[name=128]').addClass("hide");
+		$('.select_other_ipad').css("height","138px");
+	}
+	$('ul[name=selectOtherIpad]').find('input[value="'+ urlProductId +'"]').click();
+}
+	
+function firstStart(){
+	$("input[id$='PhoneIdHiddenField']").val(urlProductId);
+	$("input[id$='PhoneVariantIdHiddenField']").val(urlProductId);	
+	$('[name="302262(AllProducts)"]').find('input:radio[name="period"]').click();
+	$('[name="CachePaymentMdr"]').find('input:radio[name="periodMdr"]').click();
+}
+
+function iPadInStock(productId){
+	var iPadState;
+	$.ajax({
+		url: "/webservices/ProductPresentationJSON.asmx/GetMobilePhoneProductView",
+		type: "POST",
+		data: "{'phoneId':'" + productId + "', 'isPrivate':'true'}",
+		contentType: "application/json; charset=utf-8",
+		dataType: "json",
+		async: false,
+		complete:
+		function(data) {
+			jData2 = jQuery.parseJSON(jQuery.parseJSON(data.responseText).d);
+			iPadState = jData2.Variants[0].InStock;
+		}
+	});
+	return iPadState;
+}
+
+function ShowReadMore(SubscriptionName){
+	$('[name="'+SubscriptionName +'"]').closest("ul").find("input:radio").click();
+	$('[name="'+SubscriptionName +'"]').closest("ul").find("input:radio").click();
+	var nbrMonths = $('input:radio[name=periodMdr]:checked').val();
+	var selectedprisMdr = $('input:radio[name=periodMdr]:checked').closest('ul').find('[name=prisMdr]').text();
+	if(nbrMonths == "0"){
+		$('.cachepayment-text').show();
+		$('.instalment-plan-block').hide();	
+	}else{
+		$('.cachepayment-text').hide();
+		$('.instalment-plan-block').show();
+		$('.nbr-of-months').text(nbrMonths);
+		$(".price24").text(selectedprisMdr);	
+	}
+	$('#tln-read-more-button').click();			
+}
   
 
 
-	function submitForm(selectedSubscription, selectedServices, selectedPaymentMonths) {
-		$("input[id$='SubscriptionIdHiddenField']").val(selectedSubscription);
-		$("input[id$='NumberOfMonths']").val(selectedPaymentMonths);	
-		$("input[id$='AddToBasketButton']").click();
-	}
+function submitForm(selectedSubscription, selectedServices, selectedPaymentMonths) {
+	$("input[id$='SubscriptionIdHiddenField']").val(selectedSubscription);
+	$("input[id$='NumberOfMonths']").val(selectedPaymentMonths);	
+	$("input[id$='AddToBasketButton']").click();
+}
 
-	function round(v) {
-		return Math.round(v * 100) / 100;
-	}
+function round(v) {
+	return Math.round(v * 100) / 100;
+}
 
-	function sprintf() {
-		if (typeof arguments[0] !== "string") { return null; }
-		var input = arguments[0];
-		var output = [];
-		var arg = 1;
-		var start = 0;
-		while (true) {
-			var pos = input.indexOf('%o', start);
-			if (pos === -1) {
-				output.push(input.substr(start));
-				break;
-			}
-			output.push(input.substr(start, pos - start));
-			output.push(arguments[arg++]);
-			start = pos + 2;
+function sprintf() {
+	if (typeof arguments[0] !== "string") { return null; }
+	var input = arguments[0];
+	var output = [];
+	var arg = 1;
+	var start = 0;
+	while (true) {
+		var pos = input.indexOf('%o', start);
+		if (pos === -1) {
+			output.push(input.substr(start));
+			break;
 		}
-		return output.join('');
-	};
+		output.push(input.substr(start, pos - start));
+		output.push(arguments[arg++]);
+		start = pos + 2;
+	}
+	return output.join('');
+};
 		
-	function addCommas(nStr){
-		nStr += '';
-		x = nStr.split('.');
-		x1 = x[0];
-		x2 = x.length > 1 ? '.' + x[1] : '';
-		var rgx = /(\d+)(\d{3})/;
-		while (rgx.test(x1)) {
-			x1 = x1.replace(rgx, '$1' + '.' + '$2');
-		}
-		return x1 + x2;
-	}   
-    
-	var getHashQueryParam = function (a){
-		var QueryString=window.location.search.substring(1);
-		if(QueryString==''){var WinExtra=window.location.hash; if(WinExtra.length > 0){if(WinExtra.indexOf(a)>-1){ QueryString=WinExtra.substr(WinExtra.indexOf(a))}}}
-		var returnValue='';var keyValPairs=QueryString.split('&');
-		if(!keyValPairs){ keyValPairs = new Array(); keyValPairs[keyValPairs.length]=QueryString}
-		for(var counter=0;counter<keyValPairs.length;counter++){
-		var keyVal=keyValPairs[counter].split('=');if(keyVal[0]==a){
-		returnValue=keyVal[1];break;}}return returnValue;
+function addCommas(nStr){
+	nStr += '';
+	x = nStr.split('.');
+	x1 = x[0];
+	x2 = x.length > 1 ? '.' + x[1] : '';
+	var rgx = /(\d+)(\d{3})/;
+	while (rgx.test(x1)) {
+		x1 = x1.replace(rgx, '$1' + '.' + '$2');
 	}
-</script>
+	return x1 + x2;
+}   
+    
+var getHashQueryParam = function (a){
+	var QueryString= window.location.search.substring(1);
+	if(QueryString==''){var WinExtra=window.location.hash; if(WinExtra.length > 0){if(WinExtra.indexOf(a)>-1){ QueryString=WinExtra.substr(WinExtra.indexOf(a))}}}
+	var returnValue='';var keyValPairs=QueryString.split('&');
+	if(!keyValPairs){ keyValPairs = new Array(); keyValPairs[keyValPairs.length]=QueryString}
+	for(var counter=0;counter<keyValPairs.length;counter++){
+	var keyVal=keyValPairs[counter].split('=');if(keyVal[0]==a){
+	returnValue=keyVal[1];break;}}return returnValue;
+};
+);
